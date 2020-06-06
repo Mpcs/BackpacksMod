@@ -14,35 +14,35 @@ public class BackpackContainer extends Container {
     private final BackpackInventory inv;
     private final BlockContext context;
     private final PlayerEntity player;
-    private int slots;
+    private int backpackSlots;
     private Hand hand;
 
     public BackpackContainer(int syncId, PlayerInventory playerInv, PacketByteBuf buf) {
         this(syncId, playerInv, BlockContext.EMPTY, buf.readInt(), buf.readInt() == 1 ? Hand.MAIN_HAND : Hand.OFF_HAND);
     }
 
-    public BackpackContainer(int syncId, PlayerInventory playerInv, BlockContext ctx, int slots, Hand hand) {
+    public BackpackContainer(int syncId, PlayerInventory playerInv, BlockContext ctx, int backpackSlots, Hand hand) {
         super(null, syncId);
-        this.inv = new BackpackInventory(slots, this, playerInv.player);
+        this.inv = new BackpackInventory(backpackSlots, this, playerInv.player);
         this.context = ctx;
         this.player = playerInv.player;
-        this.slots = slots;
+        this.backpackSlots = backpackSlots;
         this.hand = hand;
 
         int spacing;
-        if(slots % 9 == 0)
-            spacing = 30 + (slots/9) * 18 + ((slots/9) < 5 ? 0 : 2);
+        if(backpackSlots % 9 == 0)
+            spacing = 30 + (backpackSlots /9) * 18 + ((backpackSlots /9) < 5 ? 0 : 2);
         else
-            spacing = 30 + (slots/9 + 1) * 18 + ((slots/9) < 5 ? 0 : 2);
+            spacing = 30 + (backpackSlots /9 + 1) * 18 + ((backpackSlots /9) < 5 ? 0 : 2);
 
-        for(int y = 0; y < (slots/9); y++) {
+        for(int y = 0; y < (backpackSlots /9); y++) {
             for(int x = 0; x < 9; ++x) {
                 this.addSlot(new BackpackSlot(inv, x + y * 9, 8 + x * 18, 18 + y * 18));
             }
         }
-        if((slots % 9) != 0)
-            for(int x = 0; x < (slots % 9); x++) {
-                this.addSlot(new BackpackSlot(inv, x + (slots/9) * 9, 8 + x * 18, 18 + (slots/9) * 18));
+        if((backpackSlots % 9) != 0)
+            for(int x = 0; x < (backpackSlots % 9); x++) {
+                this.addSlot(new BackpackSlot(inv, x + (backpackSlots /9) * 9, 8 + x * 18, 18 + (backpackSlots /9) * 18));
             }
 
 
@@ -56,18 +56,18 @@ public class BackpackContainer extends Container {
             this.addSlot(new Slot(playerInv, x, 8 + x * 18, 58 + spacing));
         }
 
-        DefaultedList<ItemStack> ad = DefaultedList.ofSize(slots, ItemStack.EMPTY);
+        DefaultedList<ItemStack> ad = DefaultedList.ofSize(backpackSlots, ItemStack.EMPTY);
         BackpackItem.getInventory(player.getStackInHand(this.hand), ad);
         if(ad.size() == 0)
             return;
 
         for(int x = 0; x < 9; x++)
-            for(int y = 0; y < slots/9; y++) {
+            for(int y = 0; y < backpackSlots /9; y++) {
                 this.getSlot(x + y * 9).setStack(ad.get(x+y*9));
             }
 
-        for(int x = 0; x < (slots % 9); x++) {
-            this.getSlot(x + (slots/9)*9).setStack(ad.get(x+(slots/9)*9));
+        for(int x = 0; x < (backpackSlots % 9); x++) {
+            this.getSlot(x + (backpackSlots /9)*9).setStack(ad.get(x+(backpackSlots /9)*9));
         }
 
     }
@@ -86,7 +86,7 @@ public class BackpackContainer extends Container {
 
     public void close(PlayerEntity player) {
         super.close(player);
-        DefaultedList<ItemStack> items = DefaultedList.ofSize(slots *9, ItemStack.EMPTY);
+        DefaultedList<ItemStack> items = DefaultedList.ofSize(backpackSlots *9, ItemStack.EMPTY);
         items = inv.getList(items);
         BackpackItem.setInventory(player.getStackInHand(this.hand), items);
         this.context.run((world, pos) -> {
@@ -101,15 +101,15 @@ public class BackpackContainer extends Container {
     @Override
     public ItemStack transferSlot(PlayerEntity player, int slotNum) {
         ItemStack copy = ItemStack.EMPTY;
-        Slot clickedSlot = this.slotList.get(slotNum);
+        Slot clickedSlot = this.slots.get(slotNum);
         if (clickedSlot != null && clickedSlot.hasStack()) {
             ItemStack clickedStack = clickedSlot.getStack();
             copy = clickedStack.copy();
-            if (slotNum < slots) {
-                if (!this.insertItem(clickedStack, slots, this.slotList.size(), true)) {
+            if (slotNum < backpackSlots) {
+                if (!this.insertItem(clickedStack, backpackSlots, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(clickedStack, 0, slots, false)) {
+            } else if (!this.insertItem(clickedStack, 0, backpackSlots, false)) {
                 return ItemStack.EMPTY;
             }
 
