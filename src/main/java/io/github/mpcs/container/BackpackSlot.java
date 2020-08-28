@@ -2,7 +2,7 @@ package io.github.mpcs.container;
 
 import io.github.mpcs.BackpackItem;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.container.Slot;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

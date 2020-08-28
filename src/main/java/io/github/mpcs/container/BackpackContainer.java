@@ -1,30 +1,32 @@
 package io.github.mpcs.container;
 
 import io.github.mpcs.BackpackItem;
-import net.minecraft.container.*;
+import net.fabricmc.fabric.api.event.client.player.ClientPickBlockCallback;
+import net.minecraft.screen.*;
+import net.minecraft.screen.slot.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.Hand;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraft.network.PacketByteBuf;
 
-public class BackpackContainer extends Container {
+public class BackpackContainer extends ScreenHandler {
     private final BackpackInventory inv;
-    private final BlockContext context;
+    //private final BlockContext context;
     private final PlayerEntity player;
     private int backpackSlots;
     private Hand hand;
 
     public BackpackContainer(int syncId, PlayerInventory playerInv, PacketByteBuf buf) {
-        this(syncId, playerInv, BlockContext.EMPTY, buf.readInt(), buf.readInt() == 1 ? Hand.MAIN_HAND : Hand.OFF_HAND);
+        this(syncId, playerInv, buf.readInt(), buf.readInt() == 1 ? Hand.MAIN_HAND : Hand.OFF_HAND);
     }
 
-    public BackpackContainer(int syncId, PlayerInventory playerInv, BlockContext ctx, int backpackSlots, Hand hand) {
+    public BackpackContainer(int syncId, PlayerInventory playerInv, int backpackSlots, Hand hand) {
         super(null, syncId);
+        //super(ScreenHandlerType.GENERIC_9X3, syncId,playerInv,new BackpackInventory(backpackSlots, this, playerInv.player),backpackSlots);
         this.inv = new BackpackInventory(backpackSlots, this, playerInv.player);
-        this.context = ctx;
         this.player = playerInv.player;
         this.backpackSlots = backpackSlots;
         this.hand = hand;
@@ -77,6 +79,10 @@ public class BackpackContainer extends Container {
         return true;
     }
 
+    public PlayerInventory getInventory() {
+        return player.inventory;
+    }
+
     public void onContentChanged(Inventory inv) {
         super.onContentChanged(inv);
         if (inv == this.inv) {
@@ -86,12 +92,14 @@ public class BackpackContainer extends Container {
 
     public void close(PlayerEntity player) {
         super.close(player);
-        DefaultedList<ItemStack> items = DefaultedList.ofSize(backpackSlots *9, ItemStack.EMPTY);
+
+        DefaultedList<ItemStack> items = (DefaultedList<ItemStack>) DefaultedList.ofSize(backpackSlots *9, ItemStack.EMPTY);
         items = inv.getList(items);
         BackpackItem.setInventory(player.getStackInHand(this.hand), items);
-        this.context.run((world, pos) -> {
-            this.dropInventory(player, world, this.inv);
-        });
+        //this.context.run((world, pos) -> {
+        //    this.dropInventory(player, world, this.inv);
+        //});
+        inv.onClose(player);
     }
 
     public void updateInv() {

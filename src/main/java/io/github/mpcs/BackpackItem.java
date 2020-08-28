@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.*;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -32,6 +33,8 @@ public class BackpackItem extends Item implements DyeableItem {
                 buf.writeInt(hand_1 == Hand.MAIN_HAND ? 1 : 0) ;
                 buf.writeString(playerEntity_1.getStackInHand(hand_1).getName().getString());
                 buf.writeInt(slots);
+                //buf.writeItemStack(playerEntity_1.getStackInHand(hand_1));
+                //buf.writeInt(hand_1 == Hand.MAIN_HAND ? 0 : 1);
             });
         return new TypedActionResult(ActionResult.PASS, playerEntity_1.getStackInHand(hand_1));
     }
@@ -70,9 +73,10 @@ public class BackpackItem extends Item implements DyeableItem {
                         ++totalStacks;
                         if (listedStacks <= 4) {
                             ++listedStacks;
-                            Text stackName = heldStack.getName().deepCopy();
-                            stackName.append(" x").append(String.valueOf(heldStack.getCount()));
-                            tooltip.add(stackName);
+                            Text stackName = heldStack.getName().copy();
+                            String stackString = stackName.getString();
+                            stackString = stackString + " x" + (String.valueOf(heldStack.getCount()));
+                            tooltip.add(new TranslatableText(stackString));
                         }
                     }
                 }

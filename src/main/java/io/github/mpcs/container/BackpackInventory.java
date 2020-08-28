@@ -4,7 +4,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
 
 import java.util.Iterator;
 
@@ -20,18 +21,18 @@ public class BackpackInventory implements Inventory {
         this.container = container;
     }
 
-    public DefaultedList<ItemStack> getList(DefaultedList<ItemStack> dl) {
-        dl = stacks;
+    public DefaultedList<ItemStack> getList(DefaultedList dl) {
+        dl = this.stacks;
         return dl;
     }
 
     @Override
-    public int getInvSize() {
+    public int size() {
         return stacks.size();
     }
 
     @Override
-    public boolean isInvEmpty() {
+    public boolean isEmpty() {
         Iterator var1 = this.stacks.iterator();
 
         ItemStack itemStack_1;
@@ -47,12 +48,12 @@ public class BackpackInventory implements Inventory {
     }
 
     @Override
-    public ItemStack getInvStack(int i) {
+    public ItemStack getStack(int i) {
         return i >= stacks.size() ? ItemStack.EMPTY : stacks.get(i);
     }
 
     @Override
-    public ItemStack takeInvStack(int int_1, int int_2) {
+    public ItemStack removeStack(int int_1, int int_2) {
         ItemStack itemStack_1 = Inventories.splitStack(this.stacks, int_1, int_2);
         if (!itemStack_1.isEmpty()) {
             this.container.onContentChanged(this);
@@ -62,12 +63,12 @@ public class BackpackInventory implements Inventory {
     }
 
     @Override
-    public ItemStack removeInvStack(int i) {
+    public ItemStack removeStack(int i) {
         return Inventories.removeStack(this.stacks, i);
     }
 
     @Override
-    public void setInvStack(int i, ItemStack itemStack) {
+    public void setStack(int i, ItemStack itemStack) {
         this.stacks.set(i, itemStack);
         this.container.onContentChanged(this);
     }
@@ -78,7 +79,7 @@ public class BackpackInventory implements Inventory {
     }
 
     @Override
-    public boolean canPlayerUseInv(PlayerEntity playerEntity) {
+    public boolean canPlayerUse(PlayerEntity playerEntity) {
         return true;
     }
 
